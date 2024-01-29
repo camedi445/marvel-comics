@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.cmedina.marvelcomics.di.IODispatcher
 import co.cmedina.marvelcomics.domain.usecase.GetComicListUseCase
-import co.cmedina.marvelcomics.ui.home.CharacterListMenuState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,20 +22,33 @@ class ComicListViewModel @Inject constructor(
     private val _comicListState = MutableStateFlow(
         ComicListState(
             isLoading = true,
-            comicList = emptyList()
+            comicList = emptyList(),
+            error = null
         )
     )
     val comicListState: StateFlow<ComicListState> = _comicListState.asStateFlow()
 
     fun getComicList(characterId: Int) {
         viewModelScope.launch(dispatcher) {
-            val comicList = getComicListUseCase.invoke(characterId)
-            _comicListState.update {
-                it.copy(
-                    isLoading = false,
-                    comicList = comicList
-                )
-            }
+            val comicListResult = getComicListUseCase(characterId)
+            comicListResult.fold(
+                ifRight = { comicList ->
+                    _comicListState.update {
+                        it.copy(
+                            isLoading = false,
+                            comicList = comicList
+                        )
+                    }
+                },
+                ifLeft = { messageException ->
+                    _comicListState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = messageException.message
+                        )
+                    }
+                }
+            )
         }
     }
 }

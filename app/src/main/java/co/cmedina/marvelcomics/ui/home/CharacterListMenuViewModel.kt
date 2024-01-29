@@ -1,6 +1,5 @@
 package co.cmedina.marvelcomics.ui.home
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.cmedina.marvelcomics.di.IODispatcher
@@ -23,20 +22,34 @@ class CharacterListMenuViewModel @Inject constructor(
     private val _characterListMenuState = MutableStateFlow(
         CharacterListMenuState(
             isLoading = true,
-            characterList = emptyList()
+            characterList = emptyList(),
+            error = null
         )
     )
-    val characterListMenuState: StateFlow<CharacterListMenuState> = _characterListMenuState.asStateFlow()
+    val characterListMenuState: StateFlow<CharacterListMenuState> =
+        _characterListMenuState.asStateFlow()
 
     init {
         viewModelScope.launch(dispatcher) {
-            val characterList = getCharacterListUseCase.invoke()
-            _characterListMenuState.update {
-                it.copy(
-                    isLoading = false,
-                    characterList = characterList
-                )
-            }
+            val characterListResult = getCharacterListUseCase()
+            characterListResult.fold(
+                ifRight = { characterList ->
+                    _characterListMenuState.update {
+                        it.copy(
+                            isLoading = false,
+                            characterList = characterList
+                        )
+                    }
+                },
+                ifLeft = { messageException ->
+                    _characterListMenuState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = messageException.message
+                        )
+                    }
+                }
+            )
         }
     }
 }

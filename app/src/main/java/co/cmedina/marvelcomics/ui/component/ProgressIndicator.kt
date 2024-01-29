@@ -9,16 +9,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 
 @Composable
 fun ProgressIndicator() {
     Column(
         modifier = Modifier
             .background(Color.Black)
-            .fillMaxSize(),
+            .fillMaxSize()
+            .testTag(TEST_TAG),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         CircularProgressIndicator()
     }
 }
+
+private const val TEST_TAG = "CircularProgressIndicator"

@@ -4,5 +4,6 @@ import co.cmedina.marvelcomics.domain.model.Character
 
 data class CharacterListMenuState(
     val isLoading: Boolean,
-    val characterList: List<Character>
+    val characterList: List<Character>,
+    val error: String?
 )

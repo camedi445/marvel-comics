@@ -11,17 +11,20 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,10 +33,9 @@ import co.cmedina.marvelcomics.domain.model.Comic
 import co.cmedina.marvelcomics.ui.component.GridWithTitleList
 import co.cmedina.marvelcomics.ui.component.ProgressIndicator
 import co.cmedina.marvelcomics.ui.component.TopBar
+import co.cmedina.marvelcomics.ui.theme.MarvelComicsTheme
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
-import coil.request.ImageRequest
+import kotlinx.coroutines.launch
 
 @Composable
 fun ComicListScreen(
@@ -45,6 +47,13 @@ fun ComicListScreen(
 ) {
     val comicListState
             by comicListViewModel.comicListState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(comicListState.error != null) {
+        scope.launch {
+            comicListState.error?.let { snackbarHostState.showSnackbar(it) }
+        }
+    }
     LaunchedEffect(Unit) {
         comicListViewModel.getComicList(characterId)
     }
@@ -54,6 +63,7 @@ fun ComicListScreen(
         ComicListContent(
             comicList = comicListState.comicList,
             characterName = characterName,
+            snackbarHostState = snackbarHostState,
             onComicClick = onComicClick,
             onBackPressed = onBackPressed
         )
@@ -64,16 +74,20 @@ fun ComicListScreen(
 fun ComicListContent(
     comicList: List<Comic>,
     characterName: String,
+    snackbarHostState: SnackbarHostState,
     onComicClick: (comicId: Int) -> Unit,
     onBackPressed: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopBar(title = characterName, onBackPressed = onBackPressed)
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
-            modifier = Modifier.background(Color.Black).padding(paddingValues)
+            modifier = Modifier
+                .background(Color.Black)
+                .padding(paddingValues)
         ) {
             GridWithTitleList(
                 title = stringResource(id = R.string.comic_list_title),
@@ -116,6 +130,26 @@ fun ComicItem(
             contentScale = ContentScale.FillBounds,
             contentDescription = stringResource(id = R.string.comic_list_image_desc)
         )
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+fun ComicListContentPreview() {
+    MarvelComicsTheme {
+        ComicListContent(
+            characterName = "Iron Man",
+            snackbarHostState = SnackbarHostState(),
+            onComicClick = {},
+            comicList = listOf(
+                Comic(
+                    id = 123,
+                    imageURL = "imageUrl",
+                    title = "title 1",
+                    description = "Desc 1"
+                )
+            ),
+        ) {}
     }
 }
 

@@ -22,20 +22,33 @@ class ComicDetailViewModel @Inject constructor(
     private val _comicDetailState = MutableStateFlow(
         ComicDetailState(
             isLoading = true,
-            comic = null
+            comic = null,
+            error = null
         )
     )
     val comicDetailState: StateFlow<ComicDetailState> = _comicDetailState.asStateFlow()
 
     fun getComicById(comicId: Int) {
         viewModelScope.launch(dispatcher) {
-            val comic = getComicByIdUseCase.invoke(comicId)
-            _comicDetailState.update {
-                it.copy(
-                    isLoading = false,
-                    comic = comic
-                )
-            }
+            val comicResult = getComicByIdUseCase(comicId)
+            comicResult.fold(
+                ifRight = { comic ->
+                    _comicDetailState.update {
+                        it.copy(
+                            isLoading = false,
+                            comic = comic,
+                        )
+                    }
+                },
+                ifLeft = { messageException ->
+                    _comicDetailState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = messageException.message,
+                        )
+                    }
+                }
+            )
         }
     }
 }

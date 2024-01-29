@@ -3,8 +3,6 @@ package co.cmedina.marvelcomics.data.model
 import co.cmedina.marvelcomics.domain.model.Comic
 
 data class ComicResponse(
-    val code: Int,
-    val status: String,
     val data: ComicData
 )
 

@@ -6,6 +6,5 @@ import javax.inject.Inject
 class GetComicByIdUseCase @Inject constructor(
     private val comicRepository: ComicRepository
 ) {
-
     suspend operator fun invoke(comicId: Int) = comicRepository.getComicById(comicId)
 }

@@ -20,7 +20,11 @@ private fun calculateMD5Hash(input: String): String {
 }
 
 private fun getCurrentTimestampAsString(): String {
-   return System.currentTimeMillis().toString()
+   return TimeHelper.getNow().toString()
+}
+
+object TimeHelper {
+    fun getNow() = System.currentTimeMillis()
 }
 
 
