@@ -14,16 +14,14 @@ data class CharacterData(
 
 data class CharacterDTO(
     val id: Int,
-    val name: String,
-    val description: String,
-    val thumbnail: Thumbnail
+    val thumbnail: Thumbnail,
+    val name: String
 ) {
 
     fun toDomainCharacter() = Character(
         id = this.id,
-        name = this.name,
-        description = this.description,
-        imageURL = thumbnail.getURL()
+        imageURL = thumbnail.getURL(),
+        name = this.name
     )
 }
 

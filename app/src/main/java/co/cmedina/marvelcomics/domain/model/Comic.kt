@@ -1,7 +1,8 @@
 package co.cmedina.marvelcomics.domain.model
 
-data class Character(
+data class Comic(
     val id: Int,
     val imageURL: String,
-    val name: String
+    val title: String,
+    val description: String
 )

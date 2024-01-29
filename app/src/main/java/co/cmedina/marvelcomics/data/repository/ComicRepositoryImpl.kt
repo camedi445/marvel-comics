@@ -4,6 +4,7 @@ import co.cmedina.marvelcomics.data.api.ComicAPI
 import co.cmedina.marvelcomics.data.api.PUBLIC_KEY
 import co.cmedina.marvelcomics.data.api.generateHash
 import co.cmedina.marvelcomics.domain.model.Character
+import co.cmedina.marvelcomics.domain.model.Comic
 import co.cmedina.marvelcomics.domain.repository.ComicRepository
 
 class ComicRepositoryImpl(
@@ -13,29 +14,25 @@ class ComicRepositoryImpl(
     override suspend fun getCharacterList(): List<Character> {
         val tsAndHashPair = generateHash()
         val ironMan = comicAPI.fetchCharacter(
-            nameStartsWith = "Iron Man",
-            limit = 1,
+            nameStartsWith = IRON_MAN_NAME,
             apiKey = PUBLIC_KEY,
             hash = tsAndHashPair.second,
             ts = tsAndHashPair.first
         ).data.results.first().toDomainCharacter()
         val thor = comicAPI.fetchCharacter(
-            nameStartsWith = "Thor",
-            limit = 1,
+            nameStartsWith = THOR_NAME,
             apiKey = PUBLIC_KEY,
             hash = tsAndHashPair.second,
             ts = tsAndHashPair.first
         ).data.results.first().toDomainCharacter()
         val captainAmerica = comicAPI.fetchCharacter(
-            nameStartsWith = "Captain America",
-            limit = 1,
+            nameStartsWith = CAPTAIN_AMERICA_NAME,
             apiKey = PUBLIC_KEY,
             hash = tsAndHashPair.second,
             ts = tsAndHashPair.first
         ).data.results.first().toDomainCharacter()
         val hulk = comicAPI.fetchCharacter(
-            nameStartsWith = "Hulk",
-            limit = 1,
+            nameStartsWith = HULK_NAME,
             apiKey = PUBLIC_KEY,
             hash = tsAndHashPair.second,
             ts = tsAndHashPair.first
@@ -47,4 +44,29 @@ class ComicRepositoryImpl(
             hulk
         )
     }
+
+    override suspend fun getComicList(characterId: Int): List<Comic> {
+        val tsAndHashPair = generateHash()
+        return comicAPI.fetchComicListByCharacterId(
+            characterId = characterId,
+            apiKey = PUBLIC_KEY,
+            hash = tsAndHashPair.second,
+            ts = tsAndHashPair.first
+        ).data.results.map { it.toDomainComic() }
+    }
+
+    override suspend fun getComicById(comicId: Int): Comic {
+        val tsAndHashPair = generateHash()
+        return comicAPI.fetchComicById(
+            comicId = comicId,
+            apiKey = PUBLIC_KEY,
+            hash = tsAndHashPair.second,
+            ts = tsAndHashPair.first
+        ).data.results.first().toDomainComic()
+    }
 }
+
+private const val HULK_NAME = "Hulk"
+private const val CAPTAIN_AMERICA_NAME = "Captain America"
+private const val THOR_NAME = "Thor"
+private const val IRON_MAN_NAME = "Iron Man"

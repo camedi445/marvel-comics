@@ -1,10 +1,9 @@
-package co.cmedina.marvelcomics.ui.home
+package co.cmedina.marvelcomics.ui.comicdetail
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.cmedina.marvelcomics.di.IODispatcher
-import co.cmedina.marvelcomics.domain.usecase.GetCharacterListUseCase
+import co.cmedina.marvelcomics.domain.usecase.GetComicByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,26 +14,26 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CharacterListMenuViewModel @Inject constructor(
-    private val getCharacterListUseCase: GetCharacterListUseCase,
+class ComicDetailViewModel @Inject constructor(
+    private val getComicByIdUseCase: GetComicByIdUseCase,
     @IODispatcher private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
-    private val _characterListMenuState = MutableStateFlow(
-        CharacterListMenuState(
+    private val _comicDetailState = MutableStateFlow(
+        ComicDetailState(
             isLoading = true,
-            characterList = emptyList()
+            comic = null
         )
     )
-    val characterListMenuState: StateFlow<CharacterListMenuState> = _characterListMenuState.asStateFlow()
+    val comicDetailState: StateFlow<ComicDetailState> = _comicDetailState.asStateFlow()
 
-    init {
+    fun getComicById(comicId: Int) {
         viewModelScope.launch(dispatcher) {
-            val characterList = getCharacterListUseCase.invoke()
-            _characterListMenuState.update {
+            val comic = getComicByIdUseCase.invoke(comicId)
+            _comicDetailState.update {
                 it.copy(
                     isLoading = false,
-                    characterList = characterList
+                    comic = comic
                 )
             }
         }

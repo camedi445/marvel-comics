@@ -2,7 +2,6 @@ package co.cmedina.marvelcomics.data.api
 
 import java.security.MessageDigest
 
-
 fun generateHash() : Pair<String, String> {
     val ts = getCurrentTimestampAsString()
     val hash = calculateMD5Hash("$ts$PRIVATE_KEY$PUBLIC_KEY")
@@ -17,7 +16,6 @@ private fun calculateMD5Hash(input: String): String {
     for (byte in bytes) {
         stringBuilder.append(String.format("%02x", byte))
     }
-
     return stringBuilder.toString()
 }
 

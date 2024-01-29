@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">MarvelComics</string>
     <string name="start_screen_init_button">Iniciar</string>
+    <string name="character_list_menu_title">Selecciona un personaje</string>
+    <string name="character_list_menu_desc">Personaje</string>
+    <string name="comic_list_title">Selecciona un comic</string>
+    <string name="comic_list_image_desc">Comic</string>
+    <string name="top_bar_back_arrow">Ir hacia atras</string>
 </resources>

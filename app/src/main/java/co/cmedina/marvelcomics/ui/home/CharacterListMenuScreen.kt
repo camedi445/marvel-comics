@@ -2,57 +2,45 @@ package co.cmedina.marvelcomics.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import co.cmedina.marvelcomics.R
 import co.cmedina.marvelcomics.domain.model.Character
+import co.cmedina.marvelcomics.ui.component.GridWithTitleList
+import co.cmedina.marvelcomics.ui.component.ProgressIndicator
 import coil.compose.AsyncImage
 
 @Composable
 fun CharacterListMenuScreen(
-    characterListMenuViewModel: CharacterListMenuViewModel = hiltViewModel()
+    characterListMenuViewModel: CharacterListMenuViewModel = hiltViewModel(),
+    onCharacterClick: (characterId: Int, characterName: String) -> Unit
 ) {
     val characterListMenuState
-        by characterListMenuViewModel.characterListMenuState.collectAsStateWithLifecycle()
+            by characterListMenuViewModel.characterListMenuState.collectAsStateWithLifecycle()
 
     if (characterListMenuState.isLoading) {
-        Column(
-            modifier = Modifier.background(Color.Black).fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement =  Arrangement.Center
-        ) {
-            CircularProgressIndicator()
-        }
-
+        ProgressIndicator()
     } else {
         CharacterListMenuContent(
-            characterListMenuState.characterList
+            characterListMenuState.characterList,
+            onCharacterClick = onCharacterClick
         )
     }
 }
@@ -60,37 +48,23 @@ fun CharacterListMenuScreen(
 
 @Composable
 fun CharacterListMenuContent(
-    characterList: List<Character>
+    characterList: List<Character>,
+    onCharacterClick: (characterId: Int, characterName: String) -> Unit
 ) {
     Column(
         modifier = Modifier.background(Color.Black)
     ) {
-        Spacer(modifier = Modifier.size(48.dp))
-        Text(
-            text = "Selecciona un personaje",
-            modifier = Modifier
-                .padding(
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 16.dp
-                )
-                .fillMaxWidth(),
-            style = TextStyle(
-                color = Color.White,
-                fontWeight = FontWeight.W700,
-                fontSize = 24.sp
-            )
-        )
-        LazyVerticalGrid(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            columns = GridCells.Fixed(2)
-
+        GridWithTitleList(
+            title = stringResource(id = R.string.character_list_menu_title),
+            fixedLazyGridSize = GRID_FIXED_SIZE,
+            modifier = Modifier.size(TOP_SPACE_SIZE)
         ) {
             items(characterList) { character ->
                 CharacterItem(
-                    imageURL = character.imageURL
+                    imageURL = character.imageURL,
+                    characterId = character.id,
+                    characterName = character.name,
+                    onCharacterClick = onCharacterClick
                 )
             }
         }
@@ -100,25 +74,27 @@ fun CharacterListMenuContent(
 @Composable
 fun CharacterItem(
     modifier: Modifier = Modifier,
-    imageURL: String
+    imageURL: String,
+    characterId: Int,
+    characterName: String,
+    onCharacterClick: (characterId: Int, characterName: String) -> Unit
 ) {
     val configuration = LocalConfiguration.current
-    val cardHeight = configuration.screenHeightDp.div(2.375)
+    val cardHeight = configuration.screenHeightDp.div(CARD_HEIGHT_SCALE)
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(cardHeight.dp)
-            .padding(4.dp)
+            .padding(CARD_PADDING)
             .clip(MaterialTheme.shapes.small)
-            .clickable { /* Handle card click */ }
+            .clickable {
+                onCharacterClick(characterId, characterName)
+            }
     ) {
         AsyncImage(
             model = imageURL,
-            contentScale = ContentScale.FillBounds,
-
-            // TODO placeholder = painterResource(id = R.drawable.sudoimage),
-            // TODO error = painterResource(id = R.drawable.sudoimage),
-            contentDescription = null //"The delasign logo",
+            contentScale = ContentScale.FillHeight,
+            contentDescription = stringResource(id = R.string.character_list_menu_desc)
         )
     }
 }
@@ -132,3 +108,8 @@ fun CharacterListMenuScreenPreview() {
         )
     }
 }*/ // TODO fix it
+
+private const val GRID_FIXED_SIZE = 2
+private val CARD_PADDING = 4.dp
+private const val CARD_HEIGHT_SCALE = 3.5
+private val TOP_SPACE_SIZE = 48.dp

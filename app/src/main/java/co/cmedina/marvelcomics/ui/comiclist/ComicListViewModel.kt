@@ -1,10 +1,10 @@
-package co.cmedina.marvelcomics.ui.home
+package co.cmedina.marvelcomics.ui.comiclist
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.cmedina.marvelcomics.di.IODispatcher
-import co.cmedina.marvelcomics.domain.usecase.GetCharacterListUseCase
+import co.cmedina.marvelcomics.domain.usecase.GetComicListUseCase
+import co.cmedina.marvelcomics.ui.home.CharacterListMenuState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,26 +15,26 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CharacterListMenuViewModel @Inject constructor(
-    private val getCharacterListUseCase: GetCharacterListUseCase,
+class ComicListViewModel @Inject constructor(
+    private val getComicListUseCase: GetComicListUseCase,
     @IODispatcher private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
-    private val _characterListMenuState = MutableStateFlow(
-        CharacterListMenuState(
+    private val _comicListState = MutableStateFlow(
+        ComicListState(
             isLoading = true,
-            characterList = emptyList()
+            comicList = emptyList()
         )
     )
-    val characterListMenuState: StateFlow<CharacterListMenuState> = _characterListMenuState.asStateFlow()
+    val comicListState: StateFlow<ComicListState> = _comicListState.asStateFlow()
 
-    init {
+    fun getComicList(characterId: Int) {
         viewModelScope.launch(dispatcher) {
-            val characterList = getCharacterListUseCase.invoke()
-            _characterListMenuState.update {
+            val comicList = getComicListUseCase.invoke(characterId)
+            _comicListState.update {
                 it.copy(
                     isLoading = false,
-                    characterList = characterList
+                    comicList = comicList
                 )
             }
         }
